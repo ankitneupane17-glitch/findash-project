@@ -14,6 +14,8 @@ pipeline {
         IMAGE_NAME = 'findash-app-trainer' // Add your username here
         // Jenkins Credential ID
         NEXUS_CRED = 'nexus-auth-trainer' 
+        // Set container name
+        CONTAINER_NAME = 'findash-app-trainer'
     }
 
     stages {
@@ -42,11 +44,14 @@ pipeline {
                 script {
                     echo "Starting Deployment for Tag: ${params.VERSION_TAG}..."
 
-                    // 1. Determine configuration based on deployment type
+                    // 1. Clean up existing container (if any)
+                    sh "docker rm -f ${CONTAINER_NAME} || true"
+
+                    // 2. Determine configuration based on deployment type
                     def envColor = params.APP_COLOR
                     def envVersion = params.VERSION_TAG
 
-                    // 2. Login & Run
+                    // 3. Login & Run
                     docker.withRegistry("http://${NEXUS_REGISTRY}", "${NEXUS_CRED}") {
                         
                         // Pull the specific version (important for Rollback)
